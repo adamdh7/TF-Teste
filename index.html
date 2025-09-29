@@ -1,374 +1,283 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#000000" />
-  <title>Adam_D'H7</title>
+  <title>Adam_D'H7 — PDF Viewer</title>
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dckwrqrur/image/upload/v1757205404/tf-stream-url/Screenshot_20250906_202106_Chrome_go9vhu.jpg" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
 
-  <!-- PDF.js from CDN (optional) -->
+  <!-- PDF.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.10.115/pdf.min.js"></script>
 
   <style>
-    :root{
-      --card-max-width:920px;
-      --card-min-height:80px;
-      --card-max-height:80vh;
-      --mini-w:100px;
-      --mini-h:70px;
-    }
-    html,body{height:100%;}
-    body{
-      margin:0;
-      background:#000;
-      color:#fff;
-      font-family:'Roboto',sans-serif;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      padding-bottom:60px;
+    :root {
+      --bg: #000;
+      --fg: #fff;
+      --gap: 18px;
     }
 
-    .header{ padding:18px 16px; text-align:center; position:sticky; top:0; backdrop-filter: blur(10px); background: rgba(0,0,0,0.7); z-index:10; }
-    .logo{ font-size:26px; font-weight:700; background:linear-gradient(90deg,#fff,#000); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    .search-container{ display:flex; justify-content:center; padding:8px 20px; }
-    .search-box{ width:100%; max-width:500px; background:#1c1c1e; border:none; padding:10px 14px; border-radius:12px; color:#fff; font-size:15px; outline:none; }
-
-    #explorerView{ padding:18px; max-height:calc(100vh - 120px); overflow-y:auto; background:#000; -webkit-overflow-scrolling:touch; }
-
-    .post-card{ background:#111; border-radius:14px; padding:14px; margin-bottom:18px; box-shadow:0 2px 8px rgba(0,0,0,0.7); }
-    .post-name{ font-weight:700; font-size:16px; margin:8px 0; color:#fff; text-align:left; }
-    .post-text{ font-size:14px; color:#ddd; margin-bottom:10px; white-space:pre-wrap; text-align:left; }
-    .post-desc{ font-size:13px; color:#ccc; margin-top:8px; text-align:left; }
-
-    .media-wrap{ text-align:center; margin: 0 0 10px 0; }
-
-    .post-thumb-container {
-      position:relative;
-      display:inline-block;
-      box-sizing:border-box;
-      max-width:var(--card-max-width);
-      width:auto;
-      background:#000;
-      border-radius:12px;
-      overflow:hidden;
-      padding:0;
-      box-shadow: inset 0 0 18px rgba(0,0,0,0.45), 0 6px 18px rgba(0,0,0,0.6);
-      min-height:var(--card-min-height);
-      max-height:var(--card-max-height);
-      cursor:pointer;
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Roboto', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    .post-thumb, .post-thumb img, .post-thumb video, .post-thumb iframe { display:block; width:auto; max-width:100%; height:auto; max-height:calc(var(--card-max-height)); object-fit:contain; background:#000; border-radius:0; }
-    .post-thumb iframe, .post-thumb video { display:block; width:100%; height:auto; }
+    /* Header (kept minimal) */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .logo { font-weight:700; font-size:18px; color:var(--fg); }
 
-    .social-section{ margin-top:10px; padding-top:10px; border-top:1px solid #333; display:flex; justify-content:center; gap:18px; flex-wrap:wrap; }
-    .social-section a{ color:#fff; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:10px; background:rgba(255,255,255,0.03); }
-    .social-section i{ font-size:18px; }
+    /* Explorer area */
+    #explorerView { padding: 14px; min-height: calc(100vh - 60px); background: var(--bg); }
 
-    .ad-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.9); display:none; justify-content:center; align-items:center; z-index:10000; }
-    .ad-container{ position:relative; max-width:90%; width:100%; height:80%; background:#111; padding:0; border-radius:10px; overflow:hidden; }
-    .ad-container iframe{ width:100%; height:100%; border:none; background:#000; }
-    .skip-btn{ position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.5); border:none; color:#fff; padding:8px 12px; border-radius:6px; cursor:pointer; display:none; z-index:1001; }
+    .post-card { background:#0f0f10; border-radius:12px; padding:12px; margin-bottom:14px; box-shadow: 0 4px 18px rgba(0,0,0,0.6); }
+    .post-name { font-weight:700; margin-bottom:8px; color:var(--fg); }
+    .post-desc, .post-text { color:#dcdcdc; font-size:14px; margin-bottom:8px; }
 
-    /* PDF overlay: solid black background and centered content */
-    .pdf-overlay{ position:fixed; inset:0; background:#000; display:none; z-index:12000; align-items:center; justify-content:center; padding:18px; }
-    .pdf-container{ width:100%; max-width:1000px; height:90vh; background:#000; border-radius:10px; overflow:auto; position:relative; box-shadow: 0 6px 30px rgba(0,0,0,0.6); }
-    .pdf-controls{ position:absolute; top:8px; left:8px; right:8px; display:flex; gap:8px; justify-content:center; align-items:center; z-index:12001; }
-    .pdf-controls button{ background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); color:#fff; padding:8px 10px; border-radius:8px; }
-    .pdf-canvas-wrap{ display:flex; justify-content:center; align-items:flex-start; padding:60px 10px 20px 10px; min-height:calc(90vh - 40px); }
-    canvas.pdf-page{ box-shadow: 0 6px 18px rgba(0,0,0,0.7); margin-bottom:18px; background:#000; }
+    .post-thumb-container { display:block; width:100%; background:#000; border-radius:8px; overflow:hidden; cursor:pointer; text-align:center; padding:8px; }
+    .post-thumb { max-width:100%; height:auto; display:inline-block; object-fit:contain; }
 
-    .pdf-fallback-iframe { width:100%; height:calc(90vh - 60px); border:none; background:#000; display:block; }
+    /* Ad overlay left intact */
+    .ad-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.9); display:none; z-index:10000; align-items:center; justify-content:center; }
+    .ad-container { width:100%; max-width:1200px; height:80%; background:#000; border-radius:12px; overflow:hidden; }
 
-    @media (max-width:600px) {
-      :root { --mini-w:86px; --mini-h:62px; }
-      .pdf-container{ height:95vh; }
-      .pdf-controls{ flex-wrap:wrap; }
+    /* === PDF overlay: FULLSCREEN === */
+    .pdf-overlay {
+      position: fixed;
+      inset: 0; /* full screen */
+      display: none; /* shown by JS */
+      z-index: 12000;
+      background: var(--bg);
+      align-items: stretch;
+      justify-content: stretch;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
-    .ad-overlay { background: #000 !important; pointer-events: auto; }
-    .ad-container iframe { background: #000 !important; }
+    /* Container fills everything */
+    .pdf-container {
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      overflow: hidden;
+      position: relative;
+      background: var(--bg);
+    }
+
+    /* Only a single close button in the corner */
+    .pdf-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 13000;
+      background: rgba(0,0,0,0.5);
+      color: var(--fg);
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight:600;
+      backdrop-filter: blur(6px);
+    }
+
+    /* Canvas wrapper scrolls and centers pages */
+    .pdf-canvas-wrap {
+      flex: 1 1 auto;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      padding: 20px;
+      justify-content: flex-start;
+    }
+
+    canvas.pdf-page {
+      max-width: calc(100% - 20px);
+      width: auto;
+      height: auto;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+      background: #000;
+      border-radius: 4px;
+      display: block;
+    }
+
+    /* Fallback iframe (if pdf.js not available) */
+    .pdf-fallback-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #000;
+    }
+
+    /* small screens tweaks */
+    @media (max-width: 600px) {
+      .pdf-close { top: 8px; right: 8px; padding: 8px; font-size:14px; }
+      .pdf-canvas-wrap { padding: 12px; gap: 14px; }
+    }
   </style>
 </head>
 <body>
   <div class="header">
     <div class="logo">Adam_D'H7</div>
-    <div class="search-container">
-      <input id="searchBox" class="search-box" placeholder="Rechèch..." oninput="filterSearch(this.value)">
-    </div>
   </div>
 
   <div id="explorerView" role="main" aria-live="polite"></div>
 
-  <!-- Pré-roll overlay -->
-  <div id="adOverlay" class="ad-overlay" aria-hidden="true" role="dialog" aria-label="Publicité">
-    <div class="ad-container" role="document" aria-label="Contenu publicité">
-      <iframe id="prerollFrame" src="about:blank" allow="autoplay; fullscreen" title="Pré-roll Ad"></iframe>
-      <button id="skipBtn" class="skip-btn" onclick="closeAd()" aria-label="Ignorer la publicité">Ignorer la pub</button>
+  <!-- Ad overlay (kept) -->
+  <div id="adOverlay" class="ad-overlay" aria-hidden="true" role="dialog">
+    <div class="ad-container">
+      <iframe id="prerollFrame" src="about:blank" allow="autoplay; fullscreen" title="Pré-roll Ad" style="width:100%;height:100%;border:0;background:#000;"></iframe>
     </div>
   </div>
 
-  <!-- PDF overlay -->
+  <!-- PDF overlay (FULLSCREEN) -->
   <div id="pdfOverlay" class="pdf-overlay" role="dialog" aria-hidden="true" aria-label="Lecteur PDF">
     <div class="pdf-container" role="document">
-      <div class="pdf-controls">
-        <button id="pdfPrev">Préc.</button>
-        <button id="pdfNext">Suiv.</button>
-        <div style="min-width:80px;text-align:center" id="pdfPageInfo">0 / 0</div>
-        <button id="pdfZoomOut">-</button>
-        <button id="pdfZoomIn">+</button>
-        <button id="pdfClose">Fermer</button>
-      </div>
-      <div id="pdfCanvasWrap" class="pdf-canvas-wrap"></div>
+      <button id="pdfClose" class="pdf-close" aria-label="Fermer la lecture">Fermer</button>
+      <div id="pdfCanvasWrap" class="pdf-canvas-wrap" aria-live="polite"></div>
     </div>
   </div>
 
   <script>
-    /*******************************
-     * CONFIG
-     *******************************/
-    const AD_REDIRECT_URL = "https://pantherinvincible.com/cdz2dffrd?key=5dc5b83c663fd8944f650feafdc6c600";
-    const AD_PROXY_PREFIX = null;
-    const SKIP_DELAY_MS = 7000;
-    const AUTO_AD_INTERVAL_MS = 180000; // 3 minutes
-
-    /*******************************
-     * Ad helpers
-     *******************************/
-    function logAdEvent(action, extra = {}) {
-      try {
-        const logs = JSON.parse(localStorage.getItem('adLogs') || '[]');
-        logs.push({ action, extra, t: new Date().toISOString() });
-        while (logs.length > 1000) logs.shift();
-        localStorage.setItem('adLogs', JSON.stringify(logs));
-      } catch (e) { console.warn('logAdEvent error', e); }
+    /***** PDF.js setup *****/
+    const pdfjsLib = window['pdfjsLib'] || window['pdfjs-dist/build/pdf'];
+    if (pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.10.115/pdf.worker.min.js';
     }
 
-    function getLoadUrl(u) {
-      if (!u) return u;
-      if (AD_PROXY_PREFIX && AD_PROXY_PREFIX.toString().trim()) {
-        return AD_PROXY_PREFIX + encodeURIComponent(u);
-      }
-      return u;
-    }
-
-    const overlay = document.getElementById('adOverlay');
+    const explorer = document.getElementById('explorerView');
+    const pdfOverlay = document.getElementById('pdfOverlay');
+    const pdfCanvasWrap = document.getElementById('pdfCanvasWrap');
+    const pdfCloseBtn = document.getElementById('pdfClose');
+    const adOverlay = document.getElementById('adOverlay');
     const prerollFrame = document.getElementById('prerollFrame');
-    const skipBtn = document.getElementById('skipBtn');
-    let skipTimeout = null;
-    let adCallback = null;
 
-    function showAdAndLoadImmediate() {
-      overlay.style.display = 'flex';
-      overlay.setAttribute('aria-hidden','false');
-      skipBtn.style.display = 'none';
-
-      // lock scroll
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
-
-      const rawUrl = AD_REDIRECT_URL;
-      const url = getLoadUrl(rawUrl);
-
-      const prevNote = document.getElementById('ad-block-note');
-      if (prevNote && prevNote.parentNode) prevNote.parentNode.removeChild(prevNote);
-
-      let loaded = false;
-      const iframe = prerollFrame;
-      try { iframe.onload = null; } catch(e){}
-      iframe.onload = function() {
-        loaded = true;
-        clearTimeout(skipTimeout);
-        skipTimeout = setTimeout(() => { skipBtn.style.display = 'block'; }, SKIP_DELAY_MS);
-        logAdEvent('overlay_iframe_onload', { url });
-      };
-      try { iframe.src = url; logAdEvent('overlay_iframe_set_attempt', { url }); } catch (e) { logAdEvent('overlay_iframe_set_exception', { err: e && e.message }); }
-
-      const FAIL_MS = 900;
-      setTimeout(() => {
-        if (loaded) return;
-        logAdEvent('overlay_iframe_no_onload_fast', { url });
-        const container = overlay.querySelector('.ad-container');
-        if (container) {
-          if (!document.getElementById('ad-block-note')) {
-            const note = document.createElement('div');
-            note.id = 'ad-block-note';
-            note.style.position = 'absolute';
-            note.style.left = '12px';
-            note.style.right = '12px';
-            note.style.bottom = '12px';
-            note.style.padding = '10px 12px';
-            note.style.background = 'rgba(0,0,0,0.6)';
-            note.style.color = '#fff';
-            note.style.fontSize = '13px';
-            note.style.borderRadius = '8px';
-            note.style.textAlign = 'center';
-            note.textContent = '';
-            container.appendChild(note);
-          }
-        }
-        skipBtn.style.display = 'block';
-      }, FAIL_MS);
-    }
-
-    function closeAd() {
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
-      overlay.style.display = 'none';
-      overlay.setAttribute('aria-hidden','true');
-      clearTimeout(skipTimeout);
-      try { prerollFrame.src = 'about:blank'; } catch(e){}
-      logAdEvent('overlay_closed');
-      if (typeof adCallback === 'function') {
-        try { setTimeout(() => { adCallback(); adCallback = null; }, 120); } catch(e){}
-      }
-    }
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (overlay.style.display === 'flex') closeAd();
-        if (document.getElementById('pdfOverlay').style.display === 'flex') closePdfViewer();
-      }
-    });
-
-    /*******************************
-     * Auto ad interval (every 3 minutes)
-     *******************************/
-    let autoAdInterval = setInterval(() => {
-      if (overlay.style.display !== 'flex' && document.getElementById('pdfOverlay').style.display !== 'flex') {
-        showAdAndLoadImmediate();
-      }
-    }, AUTO_AD_INTERVAL_MS);
-
-    /*******************************
-     * Posts loading & click wiring
-     *******************************/
     let allData = [];
 
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
-
-    fetch("index.json")
-      .then(r => r.json())
-      .then(files => Promise.all(files.map(f => fetch(f).then(r => r.json()))))
+    /* load index.json -> files listed inside should be JSON with posts */
+    fetch('index.json')
+      .then(r => {
+        if (!r.ok) throw new Error('index.json not found');
+        return r.json();
+      })
+      .then(files => Promise.all(files.map(f => fetch(f).then(r => r.ok ? r.json() : null).catch(()=>null))))
       .then(jsons => {
-        jsons.forEach(d => Array.isArray(d) ? allData.push(...d) : allData.push(d));
+        jsons.forEach(j => { if (!j) return; if (Array.isArray(j)) allData.push(...j); else allData.push(j); });
         shuffle(allData);
         displayExplorer(allData);
-      }).catch(err => {
-        console.error("Erreur chargement JSON:", err);
-        const ex = document.getElementById("explorerView");
-        ex.innerHTML = '<div style="color:#999;padding:20px;text-align:center">Pa kapab chaje kontni (index.json).</div>';
+      })
+      .catch(err => {
+        explorer.innerHTML = '<div style="color:#999;padding:20px;text-align:center">Pa kapab chaje kontni (index.json)</div>';
+        console.error(err);
       });
 
-    function filterSearch(val){
-      const txt = (val || "").toLowerCase();
-      const filtered = allData.filter(p =>
-        ((p.Catégorie || p.Categorie || p.category || "").toString().toLowerCase() === "poste") &&
-        (
-          (p.Texte||p.Bio||p.Info||"").toString().toLowerCase().includes(txt) ||
-          (p.Name||"").toString().toLowerCase().includes(txt) ||
-          (p.Description||p.Desc||"").toString().toLowerCase().includes(txt)
-        )
-      );
-      displayExplorer(filtered);
-    }
+    function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 
-    function displayExplorer(data){
-      const ex = document.getElementById("explorerView");
-      ex.innerHTML = "";
-      data.forEach((post) => {
-        if (((post.Catégorie||post.Categorie||"" )).toString().toLowerCase() !== "poste") return;
+    function displayExplorer(list){
+      explorer.innerHTML = '';
+      list.forEach(post => {
+        const cat = (post.Catégorie||post.Categorie||post.category||'').toString().toLowerCase();
+        if (cat !== 'poste') return;
 
-        const card = document.createElement("div");
-        card.className = "post-card";
+        const card = document.createElement('div');
+        card.className = 'post-card';
 
-        const ptext = document.createElement("div");
-        ptext.className = "post-text";
-        ptext.textContent = post.Texte || post.Bio || post.Info || "";
-        card.appendChild(ptext);
+        const title = document.createElement('div'); title.className = 'post-name'; title.textContent = post.Name || '';
+        const desc = document.createElement('div'); desc.className = 'post-desc'; desc.textContent = post.Description || post.Texte || '';
 
-        const title = document.createElement("div");
-        title.className = "post-name";
-        title.textContent = post.Name || "";
-        card.appendChild(title);
-
-        const mediaWrap = document.createElement("div");
-        mediaWrap.className = "media-wrap";
-
-        const thumbCon = document.createElement("div");
-        thumbCon.className = "post-thumb-container";
-
-        const thumbSrc = post["Url Thumb"] || post.Previously || post.image || post.thumb || "";
-        const img = document.createElement("img");
-        img.className = "post-thumb";
-        img.alt = post.Description || post.Name || "";
-        img.loading = "lazy";
-        img.src = thumbSrc || "https://via.placeholder.com/800x450?text=Preview";
-
+        const thumbCon = document.createElement('div'); thumbCon.className = 'post-thumb-container';
+        const img = document.createElement('img'); img.className = 'post-thumb'; img.alt = post.Name || '';
+        img.loading = 'lazy';
+        img.src = post['Url Thumb'] || post.Previously || post.image || 'https://via.placeholder.com/800x450?text=Preview';
         thumbCon.appendChild(img);
-        mediaWrap.appendChild(thumbCon);
-        card.appendChild(mediaWrap);
 
-        const desc = document.createElement("div");
-        desc.className = "post-desc";
-        desc.textContent = post.Description || post.Desc || post.Texte || "";
-        card.appendChild(desc);
-
-        thumbCon.addEventListener("click", (ev) => {
+        thumbCon.addEventListener('click', (ev) => {
           ev.stopPropagation();
-          const src = post.Previously || post.video || post["Url Video"] || post["Url"] || post.image || post.media || "";
+          const src = post.Previously || post.video || post['Url Video'] || post['Url'] || post.image || post.media || '';
+          if (!src) return;
           if (isPdf(src)) {
-            adCallback = () => openPdfViewer(src);
-            showAdAndLoadImmediate();
+            // show ad first if desired, otherwise directly open
+            // Here we directly open viewer (remove ad logic or keep as needed)
+            openPdfViewer(src);
           } else {
-            adCallback = () => playMedia(src, thumbCon);
-            showAdAndLoadImmediate();
+            // simple inline play for images/videos
+            playMediaInline(src, thumbCon);
           }
         });
 
-        ex.appendChild(card);
+        card.appendChild(title);
+        card.appendChild(thumbCon);
+        card.appendChild(desc);
+        explorer.appendChild(card);
       });
-
-      displaySocialLinks();
     }
 
     function isPdf(src){
       if (!src) return false;
-      try { return src.split('?')[0].toLowerCase().endsWith('.pdf'); } catch(e) { return false; }
+      try { return src.split('?')[0].toLowerCase().endsWith('.pdf'); } catch(e){ return false; }
+    }
+
+    function playMediaInline(src, container){
+      container.innerHTML = '';
+      if (looksLikeVideo(src)){
+        const video = document.createElement('video');
+        video.src = src;
+        video.controls = true;
+        video.autoplay = true;
+        video.playsInline = true;
+        video.style.maxWidth = '100%';
+        video.style.height = 'auto';
+        video.setAttribute('controlsList', 'nodownload');
+        container.appendChild(video);
+        video.addEventListener('error', ()=> container.innerHTML = '<div style="color:#999;padding:12px;text-align:center">M pa ka chaje videyo a</div>');
+      } else {
+        const img = document.createElement('img');
+        img.src = src;
+        img.loading = 'lazy';
+        img.style.maxWidth = '100%';
+        container.appendChild(img);
+        img.addEventListener('error', ()=> container.innerHTML = '<div style="color:#999;padding:12px;text-align:center">Imaj pa disponib</div>');
+      }
     }
 
     function looksLikeVideo(src){
       if (!src) return false;
-      try {
-        const url = src.toString().split('?')[0].toLowerCase();
-        if (/\.(mp4|webm|ogg|mov|mkv)$/.test(url)) return true;
-        if (src.includes("youtube.com") || src.includes("youtu.be") || src.includes("vimeo.com")) return true;
-      } catch(e){}
-      return false;
+      const s = src.split('?')[0].toLowerCase();
+      return /\.(mp4|webm|ogg|mov|mkv)$/.test(s) || s.includes('youtube.com') || s.includes('youtu.be') || s.includes('vimeo.com');
     }
 
     function normalizeYouTubeEmbed(src){
       try {
-        if (src.includes("youtu.be/")) {
-          const id = src.split("youtu.be/")[1].split(/[?&]/)[0];
-          return "https://www.youtube.com/embed/" + id + "?autoplay=1&rel=0";
+        if (src.includes('youtu.be/')) {
+          const id = src.split('youtu.be/')[1].split(/[?&]/)[0];
+          return 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0';
         }
         const u = new URL(src);
-        const vParam = u.searchParams.get('v');
-        if (vParam) return "https://www.youtube.com/embed/" + vParam + "?autoplay=1&rel=0";
+        const v = u.searchParams.get('v');
+        if (v) return 'https://www.youtube.com/embed/' + v + '?autoplay=1&rel=0';
       } catch(e){}
       return src;
     }
@@ -377,217 +286,124 @@
       try {
         const parts = src.split('/');
         const id = parts.pop() || parts.pop();
-        return "https://player.vimeo.com/video/" + id + "?autoplay=1";
+        return 'https://player.vimeo.com/video/' + id + '?autoplay=1';
       } catch(e){}
       return src;
     }
 
-    function adjustIFrameSize(iframe, container){
-      try {
-        const cw = container.clientWidth || iframe.clientWidth || Math.min(window.innerWidth, parseInt(getComputedStyle(container).maxWidth) || window.innerWidth);
-        const h = Math.round(cw * 9 / 16);
-        iframe.style.width = cw + "px";
-        iframe.style.height = h + "px";
-      } catch(e){}
-    }
-
-    function playMedia(src, container){
-      if (!src) return;
-      container.innerHTML = "";
-
-      const isVideoFile = looksLikeVideo(src);
-      if (isVideoFile){
-        if (src.includes("youtube.com") || src.includes("youtu.be")) {
-          const iframe = document.createElement("iframe");
-          iframe.src = normalizeYouTubeEmbed(src);
-          iframe.allow = "autoplay; fullscreen; picture-in-picture";
-          iframe.style.border = "none";
-          iframe.style.display = "block";
-          container.appendChild(iframe);
-          setTimeout(() => adjustIFrameSize(iframe, container), 60);
-        } else if (src.includes("vimeo.com")) {
-          const iframe = document.createElement("iframe");
-          iframe.src = normalizeVimeoEmbed(src);
-          iframe.allow = "autoplay; fullscreen; picture-in-picture";
-          iframe.style.border = "none";
-          iframe.style.display = "block";
-          container.appendChild(iframe);
-          setTimeout(() => adjustIFrameSize(iframe, container), 60);
-        } else {
-          const videoEl = document.createElement("video");
-          videoEl.src = src;
-          videoEl.controls = true;
-          videoEl.autoplay = true;
-          videoEl.playsInline = true;
-          videoEl.setAttribute("controlsList", "nodownload");
-          videoEl.style.display = "block";
-          videoEl.style.maxWidth = "100%";
-          videoEl.style.height = "auto";
-          videoEl.style.objectFit = "contain";
-          container.appendChild(videoEl);
-          videoEl.addEventListener('click', () => { if (videoEl.paused) videoEl.play(); else videoEl.pause(); });
-        }
-      } else if (isPdf(src)) {
-        openPdfViewer(src);
-      } else {
-        const imgEl = document.createElement("img");
-        imgEl.src = src;
-        imgEl.loading = "lazy";
-        imgEl.alt = "";
-        imgEl.style.display = "block";
-        imgEl.style.width = "auto";
-        imgEl.style.maxWidth = "100%";
-        imgEl.style.height = "auto";
-        imgEl.style.objectFit = "contain";
-        container.appendChild(imgEl);
-        imgEl.addEventListener('error', () => { container.innerHTML = '<div style="color:#999;padding:12px;text-align:center">Imaj pa disponib</div>'; });
-      }
-    }
-
-    function displaySocialLinks(){
-      const c = document.getElementById("explorerView"),
-            s = document.createElement("div");
-      s.className = "social-section";
-      s.innerHTML = `
-        <a href="https://www.facebook.com/profile.php?id=61578852256333" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-          <i class="fab fa-facebook-f" aria-hidden="true"></i>
-        </a>
-        <a href="mailto:dhaitiadam@gmail.com" rel="noopener noreferrer" aria-label="Mail">
-          <i class="fas fa-envelope" aria-hidden="true"></i>
-        </a>
-        <a href="https://whatsapp.com/channel/0029Vb6WLps7oQhWrUlyPQ2m" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
-          <i class="fab fa-whatsapp" aria-hidden="true"></i>
-        </a>
-        <a href="https://www.instagram.com/adam_dhaiti/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-          <i class="fab fa-instagram" aria-hidden="true"></i>
-        </a>
-        <a href="https://youtube.com/@adam_dhaiti?si=f_29jvZi6c1mJaBO" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
-          <i class="fab fa-youtube" aria-hidden="true"></i>
-        </a>
-      `;
-      const exists = Array.from(document.getElementsByClassName('social-section')).length;
-      if (!exists) c.appendChild(s);
-    }
-
-    window.getAdLogs = function() { try { return JSON.parse(localStorage.getItem('adLogs') || '[]'); } catch(e) { return []; } };
-
-    /*******************************
-     * PDF viewer using PDF.js (with fallback)
-     *******************************/
-    // try both common globals (some builds expose different names)
-    const pdfjsLib = window['pdfjsLib'] || window['pdfjs-dist/build/pdf'];
-
-    if (pdfjsLib) {
-      // set worker if available
-      if (pdfjsLib.GlobalWorkerOptions) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.10.115/pdf.worker.min.js';
-      }
-    }
-
-    const pdfOverlay = document.getElementById('pdfOverlay');
-    const pdfCanvasWrap = document.getElementById('pdfCanvasWrap');
-    const pdfPageInfo = document.getElementById('pdfPageInfo');
-    const pdfPrev = document.getElementById('pdfPrev');
-    const pdfNext = document.getElementById('pdfNext');
-    const pdfZoomIn = document.getElementById('pdfZoomIn');
-    const pdfZoomOut = document.getElementById('pdfZoomOut');
-    const pdfCloseBtn = document.getElementById('pdfClose');
-
+    /* ========== PDF rendering: render ALL pages (scrollable) ========== */
     let currentPdf = null;
     let currentPdfUrl = null;
-    let currentPage = 1;
-    let totalPages = 0;
-    let pdfScale = 1.2;
-
-    function storageKeyForPdf(url){ return 'pdf-lastpos:' + encodeURIComponent(url); }
 
     async function openPdfViewer(url){
-      // show overlay with solid black background
+      if (!url) return;
+      // show overlay fullscreen
       pdfOverlay.style.display = 'flex';
-      pdfOverlay.setAttribute('aria-hidden','false');
+      pdfOverlay.setAttribute('aria-hidden', 'false');
+      // lock scroll
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
+      pdfCanvasWrap.innerHTML = '';
 
       currentPdfUrl = url;
 
-      // If PDF.js available -> use it and remember last page/scale
       if (pdfjsLib && pdfjsLib.getDocument) {
         try {
-          const stored = JSON.parse(localStorage.getItem(storageKeyForPdf(url)) || '{}');
-          currentPage = stored.page || 1;
-          pdfScale = stored.scale || 1.2;
-
-          pdfCanvasWrap.innerHTML = '';
           const loadingTask = pdfjsLib.getDocument(url);
           currentPdf = await loadingTask.promise;
-          totalPages = currentPdf.numPages;
-          renderPage(currentPage);
+          const total = currentPdf.numPages;
+
+          // render all pages sequentially
+          for (let p = 1; p <= total; p++) {
+            await renderPdfPageToCanvas(currentPdf, p);
+          }
         } catch (e) {
-          console.error('openPdfViewer (pdf.js) error', e);
-          pdfCanvasWrap.innerHTML = '<div style="color:#999;padding:12px;text-align:center">Pa kapab chaje PDF la avèk PDF.js</div>';
+          console.error('PDF.js load error', e);
+          // fallback iframe if pdf.js can't render
+          pdfCanvasWrap.innerHTML = '';
+          const iframe = document.createElement('iframe');
+          iframe.className = 'pdf-fallback-iframe';
+          iframe.src = url;
+          pdfCanvasWrap.appendChild(iframe);
         }
       } else {
-        // Fallback: use native browser PDF rendering via iframe.
+        // no pdfjs -> iframe fallback
         pdfCanvasWrap.innerHTML = '';
         const iframe = document.createElement('iframe');
         iframe.className = 'pdf-fallback-iframe';
-        // append #view=FitH or page param if you want a default view but many hosts block fragment on cross-site.
         iframe.src = url;
-        iframe.title = 'PDF Viewer';
-        iframe.loading = 'lazy';
         pdfCanvasWrap.appendChild(iframe);
-
-        // Hide controls that depend on PDF.js
-        pdfPageInfo.textContent = '—';
       }
     }
 
-    async function renderPage(pageNum){
+    async function renderPdfPageToCanvas(pdfDoc, pageNumber) {
       try {
-        if (!currentPdf) return;
-        const page = await currentPdf.getPage(pageNum);
-        const viewport = page.getViewport({ scale: pdfScale });
+        const page = await pdfDoc.getPage(pageNumber);
+        // start with a viewport at scale=1 to get original width
+        const initialViewport = page.getViewport({ scale: 1 });
+        // calculate scale to fit available width (95% of container width)
+        const containerWidth = Math.max(320, Math.min(window.innerWidth, pdfCanvasWrap.clientWidth || window.innerWidth));
+        const targetWidth = containerWidth * 0.95; // small margin
+        const scale = (targetWidth / initialViewport.width) || 1;
+        const viewport = page.getViewport({ scale });
+
         const canvas = document.createElement('canvas');
         canvas.className = 'pdf-page';
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+
         const ctx = canvas.getContext('2d');
-
         const renderContext = { canvasContext: ctx, viewport };
-        await page.render(renderContext).promise;
 
-        pdfCanvasWrap.innerHTML = '';
         pdfCanvasWrap.appendChild(canvas);
-        pdfPageInfo.textContent = pageNum + ' / ' + totalPages;
-
-        // save last position
-        localStorage.setItem(storageKeyForPdf(currentPdfUrl), JSON.stringify({ page: pageNum, scale: pdfScale, t: new Date().toISOString() }));
-      } catch (e) {
-        console.error('renderPage error', e);
+        await page.render(renderContext).promise;
+      } catch (err) {
+        console.error('renderPdfPageToCanvas error', err);
       }
     }
-
-    pdfPrev.addEventListener('click', () => { if (!currentPdf) return; if (currentPage <= 1) return; currentPage--; renderPage(currentPage); });
-    pdfNext.addEventListener('click', () => { if (!currentPdf) return; if (currentPage >= totalPages) return; currentPage++; renderPage(currentPage); });
-    pdfZoomIn.addEventListener('click', () => { pdfScale = Math.min(4, pdfScale + 0.2); if (currentPdf) renderPage(currentPage); });
-    pdfZoomOut.addEventListener('click', () => { pdfScale = Math.max(0.4, pdfScale - 0.2); if (currentPdf) renderPage(currentPage); });
-    pdfCloseBtn.addEventListener('click', closePdfViewer);
 
     function closePdfViewer(){
       pdfOverlay.style.display = 'none';
       pdfOverlay.setAttribute('aria-hidden','true');
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
-      if (currentPdf) { try { currentPdf.destroy(); } catch(e){} }
-      currentPdf = null; currentPdfUrl = null; currentPage = 1; totalPages = 0;
+      // destroy pdf if available
+      try { if (currentPdf) currentPdf.destroy(); } catch(e){}
+      currentPdf = null;
+      currentPdfUrl = null;
       pdfCanvasWrap.innerHTML = '';
     }
 
-    // close pdf with background click
-    pdfOverlay.addEventListener('click', (e) => { if (e.target === pdfOverlay) closePdfViewer(); });
+    pdfCloseBtn.addEventListener('click', closePdfViewer);
 
-    window.getPdfLastPos = function(url){ try { return JSON.parse(localStorage.getItem(storageKeyForPdf(url)) || '{}'); } catch(e){ return {}; } };
+    // close when tapping background
+    pdfOverlay.addEventListener('click', (e) => {
+      if (e.target === pdfOverlay) closePdfViewer();
+    });
+
+    // close on ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (pdfOverlay.style.display === 'flex') closePdfViewer();
+      }
+    });
+
+    // responsive: if window resizes while overlay open, re-render pages to fit new width
+    let resizeTimeout = null;
+    window.addEventListener('resize', () => {
+      if (pdfOverlay.style.display !== 'flex') return;
+      clearTimeout(resizeTimeout);
+      // re-render small delay
+      resizeTimeout = setTimeout(async () => {
+        if (!currentPdfUrl) return;
+        // re-open to re-render pages (destroy and render again)
+        try {
+          if (currentPdf) { try { currentPdf.destroy(); } catch(e){} }
+        } catch(e){}
+        // re-render
+        openPdfViewer(currentPdfUrl);
+      }, 350);
+    });
   </script>
 </body>
-</html>
-
+  </html>
