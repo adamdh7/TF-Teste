@@ -1,13 +1,22 @@
-<!DOCTYPE html><html lang="fr">
+<!DOCTYPE html>
+<html lang="fr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#000000" />
-  <title>Adam_D'H7</title>  <!-- Font Awesome -->  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <title>Adam_D'H7</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dckwrqrur/image/upload/v1757205404/tf-stream-url/Screenshot_20250906_202106_Chrome_go9vhu.jpg" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />  <!-- PDF.js from CDN -->  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.10.115/pdf.min.js"></script>  <style>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- PDF.js from CDN (optional) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.10.115/pdf.min.js"></script>
+
+  <style>
     :root{
       --card-max-width:920px;
       --card-min-height:80px;
@@ -27,7 +36,7 @@
     }
 
     .header{ padding:18px 16px; text-align:center; position:sticky; top:0; backdrop-filter: blur(10px); background: rgba(0,0,0,0.7); z-index:10; }
-    .logo{ font-size:26px; font-weight:700; background:linear-gradient(90deg,#fff,#black); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .logo{ font-size:26px; font-weight:700; background:linear-gradient(90deg,#fff,#000); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
     .search-container{ display:flex; justify-content:center; padding:8px 20px; }
     .search-box{ width:100%; max-width:500px; background:#1c1c1e; border:none; padding:10px 14px; border-radius:12px; color:#fff; font-size:15px; outline:none; }
 
@@ -53,6 +62,7 @@
       box-shadow: inset 0 0 18px rgba(0,0,0,0.45), 0 6px 18px rgba(0,0,0,0.6);
       min-height:var(--card-min-height);
       max-height:var(--card-max-height);
+      cursor:pointer;
     }
 
     .post-thumb, .post-thumb img, .post-thumb video, .post-thumb iframe { display:block; width:auto; max-width:100%; height:auto; max-height:calc(var(--card-max-height)); object-fit:contain; background:#000; border-radius:0; }
@@ -67,13 +77,15 @@
     .ad-container iframe{ width:100%; height:100%; border:none; background:#000; }
     .skip-btn{ position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.5); border:none; color:#fff; padding:8px 12px; border-radius:6px; cursor:pointer; display:none; z-index:1001; }
 
-    /* PDF overlay */
+    /* PDF overlay: solid black background and centered content */
     .pdf-overlay{ position:fixed; inset:0; background:#000; display:none; z-index:12000; align-items:center; justify-content:center; padding:18px; }
-    .pdf-container{ width:100%; max-width:1000px; height:90vh; background:#000; border-radius:10px; overflow:auto; position:relative; }
+    .pdf-container{ width:100%; max-width:1000px; height:90vh; background:#000; border-radius:10px; overflow:auto; position:relative; box-shadow: 0 6px 30px rgba(0,0,0,0.6); }
     .pdf-controls{ position:absolute; top:8px; left:8px; right:8px; display:flex; gap:8px; justify-content:center; align-items:center; z-index:12001; }
     .pdf-controls button{ background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); color:#fff; padding:8px 10px; border-radius:8px; }
-    .pdf-canvas-wrap{ display:flex; justify-content:center; align-items:flex-start; padding:60px 10px 20px 10px; }
-    canvas.pdf-page{ box-shadow: 0 6px 18px rgba(0,0,0,0.7); margin-bottom:18px; }
+    .pdf-canvas-wrap{ display:flex; justify-content:center; align-items:flex-start; padding:60px 10px 20px 10px; min-height:calc(90vh - 40px); }
+    canvas.pdf-page{ box-shadow: 0 6px 18px rgba(0,0,0,0.7); margin-bottom:18px; background:#000; }
+
+    .pdf-fallback-iframe { width:100%; height:calc(90vh - 60px); border:none; background:#000; display:block; }
 
     @media (max-width:600px) {
       :root { --mini-w:86px; --mini-h:62px; }
@@ -83,19 +95,28 @@
 
     .ad-overlay { background: #000 !important; pointer-events: auto; }
     .ad-container iframe { background: #000 !important; }
-  </style></head>
+  </style>
+</head>
 <body>
   <div class="header">
     <div class="logo">Adam_D'H7</div>
     <div class="search-container">
       <input id="searchBox" class="search-box" placeholder="Rechèch..." oninput="filterSearch(this.value)">
     </div>
-  </div>  <div id="explorerView" role="main" aria-live="polite"></div>  <!-- Pré-roll overlay -->  <div id="adOverlay" class="ad-overlay" aria-hidden="true" role="dialog" aria-label="Publicité">
+  </div>
+
+  <div id="explorerView" role="main" aria-live="polite"></div>
+
+  <!-- Pré-roll overlay -->
+  <div id="adOverlay" class="ad-overlay" aria-hidden="true" role="dialog" aria-label="Publicité">
     <div class="ad-container" role="document" aria-label="Contenu publicité">
       <iframe id="prerollFrame" src="about:blank" allow="autoplay; fullscreen" title="Pré-roll Ad"></iframe>
       <button id="skipBtn" class="skip-btn" onclick="closeAd()" aria-label="Ignorer la publicité">Ignorer la pub</button>
     </div>
-  </div>  <!-- PDF overlay -->  <div id="pdfOverlay" class="pdf-overlay" role="dialog" aria-hidden="true" aria-label="Lecteur PDF">
+  </div>
+
+  <!-- PDF overlay -->
+  <div id="pdfOverlay" class="pdf-overlay" role="dialog" aria-hidden="true" aria-label="Lecteur PDF">
     <div class="pdf-container" role="document">
       <div class="pdf-controls">
         <button id="pdfPrev">Préc.</button>
@@ -107,7 +128,9 @@
       </div>
       <div id="pdfCanvasWrap" class="pdf-canvas-wrap"></div>
     </div>
-  </div>  <script>
+  </div>
+
+  <script>
     /*******************************
      * CONFIG
      *******************************/
@@ -117,7 +140,7 @@
     const AUTO_AD_INTERVAL_MS = 180000; // 3 minutes
 
     /*******************************
-     * Ad helpers (unchanged)
+     * Ad helpers
      *******************************/
     function logAdEvent(action, extra = {}) {
       try {
@@ -146,6 +169,8 @@
       overlay.style.display = 'flex';
       overlay.setAttribute('aria-hidden','false');
       skipBtn.style.display = 'none';
+
+      // lock scroll
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
 
@@ -206,7 +231,12 @@
       }
     }
 
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (overlay.style.display === 'flex') closeAd(); if (document.getElementById('pdfOverlay').style.display === 'flex') closePdfViewer(); } });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (overlay.style.display === 'flex') closeAd();
+        if (document.getElementById('pdfOverlay').style.display === 'flex') closePdfViewer();
+      }
+    });
 
     /*******************************
      * Auto ad interval (every 3 minutes)
@@ -442,10 +472,17 @@
     window.getAdLogs = function() { try { return JSON.parse(localStorage.getItem('adLogs') || '[]'); } catch(e) { return []; } };
 
     /*******************************
-     * PDF viewer using PDF.js
+     * PDF viewer using PDF.js (with fallback)
      *******************************/
-    const pdfjsLib = window['pdfjs-dist/build/pdf'];
-    if (pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.10.115/pdf.worker.min.js';
+    // try both common globals (some builds expose different names)
+    const pdfjsLib = window['pdfjsLib'] || window['pdfjs-dist/build/pdf'];
+
+    if (pdfjsLib) {
+      // set worker if available
+      if (pdfjsLib.GlobalWorkerOptions) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.10.115/pdf.worker.min.js';
+      }
+    }
 
     const pdfOverlay = document.getElementById('pdfOverlay');
     const pdfCanvasWrap = document.getElementById('pdfCanvasWrap');
@@ -465,34 +502,49 @@
     function storageKeyForPdf(url){ return 'pdf-lastpos:' + encodeURIComponent(url); }
 
     async function openPdfViewer(url){
-      if (!pdfjsLib) {
-        alert('PDF viewer not disponible');
-        return;
-      }
-      try {
-        pdfOverlay.style.display = 'flex';
-        pdfOverlay.setAttribute('aria-hidden','false');
-        document.documentElement.style.overflow = 'hidden';
-        document.body.style.overflow = 'hidden';
+      // show overlay with solid black background
+      pdfOverlay.style.display = 'flex';
+      pdfOverlay.setAttribute('aria-hidden','false');
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
 
-        currentPdfUrl = url;
-        const stored = JSON.parse(localStorage.getItem(storageKeyForPdf(url)) || '{}');
-        currentPage = stored.page || 1;
-        pdfScale = stored.scale || 1.2;
+      currentPdfUrl = url;
 
+      // If PDF.js available -> use it and remember last page/scale
+      if (pdfjsLib && pdfjsLib.getDocument) {
+        try {
+          const stored = JSON.parse(localStorage.getItem(storageKeyForPdf(url)) || '{}');
+          currentPage = stored.page || 1;
+          pdfScale = stored.scale || 1.2;
+
+          pdfCanvasWrap.innerHTML = '';
+          const loadingTask = pdfjsLib.getDocument(url);
+          currentPdf = await loadingTask.promise;
+          totalPages = currentPdf.numPages;
+          renderPage(currentPage);
+        } catch (e) {
+          console.error('openPdfViewer (pdf.js) error', e);
+          pdfCanvasWrap.innerHTML = '<div style="color:#999;padding:12px;text-align:center">Pa kapab chaje PDF la avèk PDF.js</div>';
+        }
+      } else {
+        // Fallback: use native browser PDF rendering via iframe.
         pdfCanvasWrap.innerHTML = '';
-        const loadingTask = pdfjsLib.getDocument(url);
-        currentPdf = await loadingTask.promise;
-        totalPages = currentPdf.numPages;
-        renderPage(currentPage);
-      } catch (e) {
-        console.error('openPdfViewer error', e);
-        pdfCanvasWrap.innerHTML = '<div style="color:#999;padding:12px;text-align:center">Pa kapab chaje PDF la</div>';
+        const iframe = document.createElement('iframe');
+        iframe.className = 'pdf-fallback-iframe';
+        // append #view=FitH or page param if you want a default view but many hosts block fragment on cross-site.
+        iframe.src = url;
+        iframe.title = 'PDF Viewer';
+        iframe.loading = 'lazy';
+        pdfCanvasWrap.appendChild(iframe);
+
+        // Hide controls that depend on PDF.js
+        pdfPageInfo.textContent = '—';
       }
     }
 
     async function renderPage(pageNum){
       try {
+        if (!currentPdf) return;
         const page = await currentPdf.getPage(pageNum);
         const viewport = page.getViewport({ scale: pdfScale });
         const canvas = document.createElement('canvas');
@@ -528,12 +580,14 @@
       document.body.style.overflow = '';
       if (currentPdf) { try { currentPdf.destroy(); } catch(e){} }
       currentPdf = null; currentPdfUrl = null; currentPage = 1; totalPages = 0;
+      pdfCanvasWrap.innerHTML = '';
     }
 
+    // close pdf with background click
     pdfOverlay.addEventListener('click', (e) => { if (e.target === pdfOverlay) closePdfViewer(); });
 
     window.getPdfLastPos = function(url){ try { return JSON.parse(localStorage.getItem(storageKeyForPdf(url)) || '{}'); } catch(e){ return {}; } };
+  </script>
+</body>
+</html>
 
-    // End of script
-  </script></body>
-          </html>
